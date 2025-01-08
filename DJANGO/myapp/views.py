@@ -6,13 +6,15 @@ from .serializers import ProductSerializer, CustomerSerializer, OrderSerializer
 from django.shortcuts import render
 from django.views.generic import ListView, DetailView, CreateView
 from .forms import ProductForm
+from rest_framework.filters import SearchFilter
 
 
 class ProductViewSet(viewsets.ModelViewSet):
     permission_classes = [IsAuthenticated, IsAdminOrReadOnly]
     queryset = Product.objects.all()
     serializer_class = ProductSerializer
-
+    filter_backends = (SearchFilter,)
+    search_fields = ['name']
 
 class CustomerViewSet(viewsets.ModelViewSet):
     permission_classes = [IsAuthenticated, IsAdminOrReadOnly]
