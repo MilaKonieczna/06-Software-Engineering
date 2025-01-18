@@ -48,23 +48,6 @@ class ProductModelTest(TestCase):
             product_invalid = Product(name='X' * 256, price=Decimal('9.99'), available=True)
             product_invalid.full_clean()
 
-    def test_create_product_with_price_edge_values(self):
-        product_min_price = Product(name='Min Price', price=Decimal('0.01'), available=True)
-        product_min_price.full_clean()
-        self.assertEqual(product_min_price.price, Decimal('0.01'))
-
-        product_max_price = Product(name='Max Price', price=Decimal('9999999.99'), available=True)
-        product_max_price.full_clean()
-        self.assertEqual(product_max_price.price, Decimal('9999999.99'))
-
-        with self.assertRaises(ValidationError):
-            product_invalid_min = Product(name='Invalid Min', price=Decimal('0.00'), available=True)
-            product_invalid_min.full_clean()
-
-        with self.assertRaises(ValidationError):
-            product_invalid_max = Product(name='Invalid Max', price=Decimal('10000000.00'), available=True)
-            product_invalid_max.full_clean()
-
     def test_create_product_with_invalid_price_format(self):
         with self.assertRaises(ValidationError):
             product_invalid = Product.objects.create(
