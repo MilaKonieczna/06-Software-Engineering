@@ -57,12 +57,13 @@ jobs:
         run: |
           python DJANGO/manage.py generateschema > docs.json
 
-      - name: Commit and push documentation
+      - name: Verify docs.json and index.html are generated
         run: |
-          git config --global user.email "github-actions[bot]@users.noreply.github.com"
-          git config --global user.name "github-actions[bot]"
-          git add docs.json index.html
-          git commit -m "Updated documentation"
-          git push origin master
+          if [[ -f "docs.json" ]]; then echo "docs.json exists"; else echo "docs.json not found"; fi
+          if [[ -f "index.html" ]]; then echo "index.html exists"; else echo "index.html not found"; fi
+
+      - name: Check for file changes and commit if needed
+        run: |
+          git diff --exit-code || (git add docs.json index.html && git commit -m "Updated documentation" && git push origin master)
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
