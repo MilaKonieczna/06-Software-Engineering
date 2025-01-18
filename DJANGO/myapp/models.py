@@ -14,8 +14,11 @@ class Product(models.Model):
     name = models.CharField(max_length=255)
     price = models.DecimalField(
         max_digits=10,
-        decimal_places=5,
-        validators=[positive]
+        decimal_places=2,
+        validators=[ 
+            MinValueValidator(Decimal('0.01')), 
+            MaxValueValidator(Decimal('9999999.99')),
+            positive]
     )
     available = models.BooleanField()
 
