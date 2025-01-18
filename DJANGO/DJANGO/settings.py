@@ -1,5 +1,5 @@
 from pathlib import Path
-
+import os
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 SECRET_KEY = 'django-insecure-90s0%*=-m)edc7+$$tyv(cl183nkto2@zk&#(no095p9k)2id^'
@@ -84,13 +84,13 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'django',
-        'USER': 'user',
-        'PASSWORD': 'User1!',
-        'HOST': 'localhost',
-        'PORT': '5432',
-     }
+    'ENGINE': 'django.db.backends.postgresql',
+    'NAME': os.getenv('DATABASE_NAME'),
+    'USER': os.getenv('DATABASE_USER'),
+    'PASSWORD': os.getenv('DATABASE_PASSWORD'),
+    'HOST': os.getenv('DATABASE_HOST', 'localhost'),
+    'PORT': os.getenv('DATABASE_PORT', 5432),
+    }
 }
 
 REST_FRAMEWORK = {
