@@ -509,8 +509,10 @@ components:
           type: string
           format: decimal
           multipleOf: 0.01
-          maximum: 100000000
-          minimum: -100000000
+          maximum: !!python/object/apply:decimal.Decimal
+          - '9999999.99'
+          minimum: !!python/object/apply:decimal.Decimal
+          - '0.01'
         available:
           type: boolean
       required:
