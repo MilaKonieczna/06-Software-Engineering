@@ -32,7 +32,7 @@ jobs:
 
       - name: Run unit tests
         run: |
-          docker-compose exec api python DJANGO/manage.py test \DJANGO\myapp\tests
+          docker-compose exec -T api python DJANGO/manage.py test DJANGO/myapp/tests
 
   docs:
     runs-on: ubuntu-latest
