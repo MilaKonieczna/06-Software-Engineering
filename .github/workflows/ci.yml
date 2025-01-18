@@ -20,7 +20,7 @@ jobs:
 
     steps:
       - name: Check out code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v2
 
       - name: Set up Docker Compose
         run: |
@@ -42,7 +42,7 @@ jobs:
 
     steps:
       - name: Check out code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v2
 
       - name: Set up Python environment
         uses: actions/setup-python@v2
@@ -61,6 +61,11 @@ jobs:
         run: |
           if [[ -f "docs.json" ]]; then echo "docs.json exists"; else echo "docs.json not found"; fi
           if [[ -f "index.html" ]]; then echo "index.html exists"; else echo "index.html not found"; fi
+
+      - name: Set Git identity
+        run: |
+          git config --global user.email "milkakm2003@gmail.com"
+          git config --global user.name "MilaKonieczna"
 
       - name: Check for file changes and commit if needed
         run: |
