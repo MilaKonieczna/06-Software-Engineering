@@ -1,41 +1,77 @@
-from django.core.exceptions import ValidationError
-from django.db import models
-from decimal import Decimal
-
-class Product(models.Model):
-    name = models.CharField(max_length=255)
-    price = models.DecimalField(max_digits=10, decimal_places=2)
-    available = models.BooleanField(default=True)
-
-    def clean(self):
-        if self.price <= Decimal('0.00'):
-            raise ValidationError("Price must be greater than 0.00.")
-        if self.price > Decimal('9999999.99'):
-            raise ValidationError("Price exceeds maximum allowed value.")
-
-
-class Customer(models.Model):
-    name = models.CharField(max_length=100)
-    address = models.CharField(max_length=255)
-
-
-class Order(models.Model):
-    customer = models.ForeignKey(Customer, on_delete=models.CASCADE)
-    products = models.ManyToManyField(Product)
-    status = models.CharField(max_length=20, default="New")
-
-    def total_price(self):
-        return sum(product.price for product in self.products.all())
-
-    def fulfilled(self):
-        return all(product.available for product in self.products.all())
-
-
 from django.test import TestCase
 from myapp.models import Product, Customer, Order
-
+from django.core.exceptions import ValidationError
+from decimal import Decimal
 
 class ProductModelTest(TestCase):
+    def test_create_product_with_valid_data(self):
+        temp_product = Product.objects.create(
+            name='Temporary product', price=Decimal('1.99'), available=True
+        )
+        self.assertEqual(temp_product.name, 'Temporary product')
+        self.assertEqual(temp_product.price, Decimal('1.99'))
+        self.assertTrue(temp_product.available)
+
+    def test_create_product_with_negative_price(self):
+        with self.assertRaises(ValidationError):
+            temp_product = Product.objects.create(
+                name='Invalid product', price=-1.99, available=True
+            )
+            temp_product.full_clean()
+
+    def test_create_product_with_missing_name(self):
+        with self.assertRaises(ValidationError):
+            temp_product = Product(name='', price=Decimal('1.99'), available=True)
+            temp_product.full_clean()
+
+    def test_create_product_with_missing_price(self):
+        product = Product(name='No Price', available=True)
+        with self.assertRaises(ValidationError):
+            product.full_clean()
+
+    def test_create_product_with_missing_availability(self):
+        product = Product(name='No Availability', price=Decimal('1.99'))
+        with self.assertRaises(ValidationError):
+            product.full_clean()
+
+    def test_create_product_with_name_length_edge_values(self):
+        product_min = Product(name='X', price=Decimal('9.99'), available=True)
+        product_min.full_clean()
+        self.assertEqual(product_min.name, 'X')
+
+        long_name = 'X' * 255
+        product_max = Product(name=long_name, price=Decimal('9.99'), available=True)
+        product_max.full_clean()
+        self.assertEqual(product_max.name, long_name)
+
+        with self.assertRaises(ValidationError):
+            product_invalid = Product(name='X' * 256, price=Decimal('9.99'), available=True)
+            product_invalid.full_clean()
+
+    def test_create_product_with_price_edge_values(self):
+        product_min_price = Product(name='Min Price', price=Decimal('0.01'), available=True)
+        product_min_price.full_clean()
+        self.assertEqual(product_min_price.price, Decimal('0.01'))
+
+        product_max_price = Product(name='Max Price', price=Decimal('9999999.99'), available=True)
+        product_max_price.full_clean()
+        self.assertEqual(product_max_price.price, Decimal('9999999.99'))
+
+        with self.assertRaises(ValidationError):
+            product_invalid_min = Product(name='Invalid Min', price=Decimal('0.00'), available=True)
+            product_invalid_min.full_clean()
+
+        with self.assertRaises(ValidationError):
+            product_invalid_max = Product(name='Invalid Max', price=Decimal('10000000.00'), available=True)
+            product_invalid_max.full_clean()
+
+    def test_create_product_with_invalid_price_format(self):
+        with self.assertRaises(ValidationError):
+            product_invalid = Product.objects.create(
+                name='Invalid Format', price=Decimal('9.999'), available=True
+            )
+            product_invalid.full_clean()
+
     def test_create_product_with_valid_data(self):
         temp_product = Product.objects.create(
             name='Temporary product', price=Decimal('1.99'), available=True
