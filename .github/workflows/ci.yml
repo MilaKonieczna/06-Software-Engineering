@@ -35,6 +35,7 @@ jobs:
           docker-compose exec -T api python DJANGO/manage.py test DJANGO/myapp/tests
 
   docs:
+    needs: test
     runs-on: ubuntu-latest
     permissions:
       contents: write
